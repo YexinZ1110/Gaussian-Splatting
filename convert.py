@@ -13,17 +13,17 @@ import os
 import logging
 from argparse import ArgumentParser
 import shutil
-from calibrate import calibrate
+from calibrate import calibrate, para_to_str
 # This Python script is based on the shell converter script provided in the MipNerF 360 repository.
 parser = ArgumentParser("Colmap converter")
 parser.add_argument("--no_gpu", action='store_true')
 parser.add_argument("--skip_matching", action='store_true')
 parser.add_argument("--source_path", "-s", required=True, type=str)
-parser.add_argument("--camera", default="OPENCV", type=str)
+parser.add_argument("--camera", default="FULL_OPENCV", type=str)
 parser.add_argument("--colmap_executable", default="", type=str)
 parser.add_argument("--resize", action="store_true")
 parser.add_argument("--magick_executable", default="", type=str)
-parser.add_argument("--camera_params", "-cp", type=str, help="Path to camera parameters file")
+parser.add_argument("--calibration_path", "-cp", type=str, help="camera calibration dataset")
 
 args = parser.parse_args()
 colmap_command = '"{}"'.format(args.colmap_executable) if len(args.colmap_executable) > 0 else "colmap"
@@ -41,8 +41,16 @@ if not args.skip_matching:
         --ImageReader.single_camera 1 \
         --ImageReader.camera_model " + args.camera + " \
         --SiftExtraction.use_gpu " + str(use_gpu)
-    if args.camera_params:
-        feat_extracton_cmd += " --ImageReader.camera_params " + calibrate()
+    
+    use_my_intrisic = False
+    if use_my_intrisic:
+        if args.calibration_path:
+            feat_extracton_cmd += " --ImageReader.camera_params " + calibrate(args.calibration_path)
+        else:
+            para = para_to_str('../datasets/cone/camera_calibration.npz')
+            print("calibration parametrs: ", para)
+            feat_extracton_cmd += " --ImageReader.camera_params " + para
+
     exit_code = os.system(feat_extracton_cmd)
     if exit_code != 0:
         logging.error(f"Feature extraction failed with code {exit_code}. Exiting.")
