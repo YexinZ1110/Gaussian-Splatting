@@ -19,7 +19,7 @@ parser = ArgumentParser("Colmap converter")
 parser.add_argument("--no_gpu", action='store_true')
 parser.add_argument("--skip_matching", action='store_true')
 parser.add_argument("--source_path", "-s", required=True, type=str)
-parser.add_argument("--camera", default="FULL_OPENCV", type=str)
+parser.add_argument("--camera", default="OPENCV", type=str)
 parser.add_argument("--colmap_executable", default="", type=str)
 parser.add_argument("--resize", action="store_true")
 parser.add_argument("--magick_executable", default="", type=str)
@@ -47,7 +47,8 @@ if not args.skip_matching:
         if args.calibration_path:
             feat_extracton_cmd += " --ImageReader.camera_params " + calibrate(args.calibration_path)
         else:
-            para = para_to_str('../datasets/cone/camera_calibration.npz')
+            # para = para_to_str('../datasets/cone/camera_calibration.npz')
+            para = para_to_str('../datasets/cone/camera_cali.npz')
             print("calibration parametrs: ", para)
             feat_extracton_cmd += " --ImageReader.camera_params " + para
 

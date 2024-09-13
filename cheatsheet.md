@@ -27,6 +27,8 @@ python convert.py -s E:\\Projects\\3d_gaussian\\datasets\\cone
 comap bin文件转txt
 ```shell
 colmap model_converter --input_path E:\Projects\3d_gaussian\datasets\cone\sparse\0 --output_path E:\Projects\3d_gaussian\datasets\cone\sparse\0 --output_type TXT
+colmap model_converter --input_path E:\Projects\3d_gaussian\datasets\cone-self-full\sparse\0\ --output_path 
+E:\Projects\3d_gaussian\datasets\cone-self-full\sparse\0\points3D.ply --output_type PLY
 ```
 ## Train
 ```shell

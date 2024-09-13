@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 def calibrate(imgs_path): 
     chessboard_size = (9, 6)  # internal corner number of chessboard
-    square_size = 1.0  # real size of square
+    square_size = 2 # real size of square
     
     # world coordinate(z=0)
     objp = np.zeros((chessboard_size[0] * chessboard_size[1], 3), np.float32)
@@ -24,7 +24,7 @@ def calibrate(imgs_path):
 
         # corners detection
         ret, corners = cv2.findChessboardCorners(gray, chessboard_size, None)
-        # print("ret: ",ret)
+        print("ret: ",ret)
         # print("corners: ",corners)
     
         if ret:
@@ -38,14 +38,21 @@ def calibrate(imgs_path):
             # cv2.waitKey(0)
     
     # cv2.destroyAllWindows()
-    print("objpoints: ", objpoints)
+    # print("objpoints: ", objpoints)
     # calibrate camera
+    # ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None, flags=cv2.CALIB_RATIONAL_MODEL)
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
 
     print("Camera matrix:\n", mtx)
     print("Distortion coefficients:\n", dist)
-    np.savez('../camera_calibration.npz', mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
+    np.savez('../datasets/cone/camera_cali.npz', mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
+    fx, fy = mtx[0, 0], mtx[1, 1]
+    cx, cy = mtx[0, 2], mtx[1, 2]
+    k1, k2, p1, p2 = dist[0][:4]
+    params_str = f"{fx},{fy},{cx},{cy},{k1},{k2},{p1},{p2}" 
+    return params_str
+
 
 def para_to_str(path):
     file = np.load(path)
@@ -53,10 +60,12 @@ def para_to_str(path):
     dist = file['dist']
     fx, fy = mtx[0, 0], mtx[1, 1]
     cx, cy = mtx[0, 2], mtx[1, 2]
-    k1, k2, p1, p2, k3 = dist[0]
-    k4, k5, k6 = 0, 0, 0
+    print("dist: ", dist.shape)
+    k1, k2, p1, p2 = dist[0][:4]
+    # k4, k5, k6 = 0, 0, 0
 
-    params_str = f"{fx},{fy},{cx},{cy},{k1},{k2},{p1},{p2},{k3},{k4},{k5},{k6}"
+    params_str = f"{fx},{fy},{cx},{cy},{k1},{k2},{p1},{p2}"
+    # params_str = f"{fx},{fy},{cx},{cy},{k1},{k2},{p1},{p2}"
     return params_str
  
 
