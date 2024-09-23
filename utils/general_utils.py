@@ -14,6 +14,7 @@ import sys
 from datetime import datetime
 import numpy as np
 import random
+from PIL import Image
 
 def inverse_sigmoid(x):
     return torch.log(x/(1-x))
@@ -25,6 +26,12 @@ def PILtoTorch(pil_image, resolution):
         return resized_image.permute(2, 0, 1)
     else:
         return resized_image.unsqueeze(dim=-1).permute(2, 0, 1)
+
+def resize_mask(mask, resolution):
+    mask_image = Image.fromarray(np.uint8(mask))
+    resized_mask_image = mask_image.resize(resolution, Image.NEAREST)
+    resized_mask = np.array(resized_mask_image) > 0.5 
+    return resized_mask
 
 def get_expon_lr_func(
     lr_init, lr_final, lr_delay_steps=0, lr_delay_mult=1.0, max_steps=1000000
