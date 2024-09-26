@@ -98,30 +98,6 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * (1.0 - ssim(image, gt_image)) #求渲染图和真图的loss
         loss.backward()
 
-
-        # mask 是一个与 gt_image 相同尺寸的二值掩码
-        mask = mask.cuda()
-
-        # 将掩码扩展到与图像相同的通道数
-        if len(mask.shape) == 2 or (len(mask.shape) == 3 and mask.shape[0] == 1):
-            mask = mask.expand_as(gt_image)
-
-        # 应用掩码到图像和目标图像
-        masked_image = image * mask
-        masked_gt_image = gt_image * mask
-
-        # 计算掩码区域的 L1 损失
-        Ll1 = F.l1_loss(masked_image, masked_gt_image, reduction='sum') / mask.sum()
-
-        # 计算掩码区域的 SSIM 损失（这里假设 ssim 函数可以处理单独的像素）
-        # 注意：这里假设 ssim 函数的实现是可用的，你可能需要调整此调用以匹配你的具体实现
-        ssim_loss = (1.0 - ssim(masked_image, masked_gt_image)) if mask.sum() > 0 else 0
-
-        # 结合 L1 和 SSIM 损失计算总损失
-        loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * ssim_loss
-        loss.backward()
-
-
         iter_end.record() #测量迭代时间。
 
         with torch.no_grad(): #记录损失的指数移动平均值
